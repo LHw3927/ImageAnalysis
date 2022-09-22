@@ -1,0 +1,53 @@
+{% extends 'blog/base_full_width.html' %}
+
+{% block main_area %}
+
+<body>
+    
+    <img id='img_main' style='width:1000' style='height:1000' src='/static/blog/image/QuteBird.jpg'/>
+    <div><button class='btn' style='background-color: #041E2D'><h6 style='color: #FFFFFF'>Upload</h6></button></div>
+    <span>
+        <form action="./result/" method="post" onsubmit="return submitResult();">
+            <!-- {% csrf_token %} -->
+            <div class="form-group">
+                <label for="form-input-mode">pyrMeanShiftFiltering</label>
+                </br>
+                </br>
+
+                <label for="form-input-sp">SP:</label><input type="range" name="sp" class="form-control" id="form-input-sp" ,min="1" max="15" value="1" required>
+                <label for="form-input-sr">SR:</label><input type="range" name="sr" class="form-control" id="form-input-sr" , min="1" max="20" value="1" required>
+                <label for="form-input-lv">LV:</label><input type="range" name="lv" class="form-control" id="form-input-lv" ,min="0" max="5" value="0" required>
+
+            </div>
+            </br>
+            <button type="submit" class="btn btn-primary">Change</button>
+        </form>
+    </span>
+
+  
+</body>
+
+<script type="text/javascript">
+    function submitResult() {
+        
+        let ajax = {}
+        ajax.type = 'post';
+        ajax.url = "/result_pMS/";
+        ajax.data = JSON.stringify({'path':'blog/static/blog/image/','file':'QuteBird.jpg',
+        'sp':$('#form-input-sp').val(),'sr':$('#form-input-sr').val(), 'lv':$('#form-input-lv').val()})
+        ajax.dataType = 'json';
+        ajax.csrf = '{{ csrf_token }}';
+        ajax.success = function(data) { ajaxSuccess(data); };
+        ajaxReady(ajax); /* jQuery.ajax */
+        return false;
+    }
+
+    function ajaxSuccess(data) {
+        path = data.data.substring(4,data.data.length)
+        $('#img_main'). attr('src',path+"?"+new Date().getTime());
+    }
+        
+</script>
+
+
+{% endblock %} 

@@ -1,0 +1,79 @@
+{% extends 'blog/base_full_width.html' %}
+{% block main_area %}
+
+<section style="min-height: 800px;">
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <form method="post" enctype="multipart/form-data" action="/program/scanimage_upload/" id="fileForm">
+                    {% csrf_token %}
+                    <label>* 이미지 파일: </label> <input type="file" name="file" id="input-image" accept="image/*">
+                    <button type="submit" class="btn btn-dark my-4">Upload</button>
+                </form>
+                <hr />
+            </div>
+            
+            <div class="col-6">
+                <h4 class="text-center">[Preview Image]</h4>
+                <img class="img-fluid" id="preview-image" src="https://dummyimage.com/500x500/ffffff/000000.png&text=preview+image">
+            </div>
+            <div class="col-6">
+                <h4 class="text-center">[Crop Image]</h4>
+                <img class="img-fluid" id="crop-image" src="https://dummyimage.com/500x500/ffffff/000000.png&text=crop+image">
+                <img class="img-fluid d-none" id="new-image">
+            </div>
+        </div>
+    </div>
+</section>
+
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+    // bind form using ajaxForm
+    $('#fileForm').ajaxForm({
+        // dataType identifies the expected content type of the server response
+        dataType:  'json',
+
+        //clearForm: true        // clear all form fields after successful submit
+        resetForm: true,        // reset the form after successful submit
+
+        // success identifies the function to invoke when the server response
+        // has been received
+        success:   ajaxSuccess
+    });
+});
+
+function ajaxSuccess(data) {
+    //data = JSON.parse(data);    
+    console.log(data);
+    
+    //$("#div-result ul li").text(JSON.stringify(data));
+    $("#crop-image").hide();
+    $("#new-image").attr("src", data.img).removeClass("d-none").show();
+}
+
+function readImage(input) {
+    // 인풋 태그에 파일이 있는 경우
+    if(input.files && input.files[0]) {
+        // 이미지 파일인지 검사 (생략)
+        // FileReader 인스턴스 생성
+        const reader = new FileReader()
+        // 이미지가 로드가 된 경우
+        reader.onload = e => {
+            const previewImage = document.getElementById("preview-image");
+            previewImage.src = e.target.result;
+        }
+        // reader가 이미지 읽도록 하기
+        reader.readAsDataURL(input.files[0])
+
+        $("#crop-image").show();
+        $("#new-image").hide();
+    }
+}
+
+// input file에 change 이벤트 부여
+const inputImage = document.getElementById("input-image");
+inputImage.addEventListener("change", e => {
+    readImage(e.target);
+});
+</script>
+{% endblock %}
