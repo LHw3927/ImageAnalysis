@@ -1,0 +1,113 @@
+{% extends 'blog/base_full_width.html' %}
+
+{% block main_area %}
+
+<body>
+    
+    <img id='img_main' style='max-width:500px' style='max-height:500px' src="https://dummyimage.com/500x500/ffffff/000000.png&text=Image" onClick = 'getGrid()'/>
+    <div>
+        <img id='img_plt_ori' style='max-width:250px' style='max-height:250px' src="https://dummyimage.com/500x500/ffffff/000000.png&text=origin" />
+        <img id='img_plt_new' style='max-width:250px' style='max-height:250px' src="https://dummyimage.com/500x500/ffffff/000000.png&text=equalize"/>
+    </div>
+
+
+
+    <form method="post" enctype="multipart/form-data" action="image_upload/" id="fileForm">
+        {% csrf_token %}
+        <label></label> <input type="file" name="file">
+        <button type="submit" class="btn btn-dark my-4" id="inputImage" style='display: none' >Upload</button>
+    </form>
+
+
+    <div>
+        <!-- <button class='btn' style='background-color: #041E2D'  onClick='simple_event()'><h6 style='color: #FFFFFF'>Upload</h6></button> -->
+        <button class='btn' style='background-color: #041E2D'  onClick='ImgUpload()'><h6 style='color: #FFFFFF'>Upload</h6></button>
+        
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary"  onClick='submitResult()'>Change</button>
+    </div>
+    
+    <span>
+        <form action="./result/" method="post" onsubmit="">
+            <!-- {% csrf_token %} -->
+            <div class="form-group">
+                <label for="form-input-mode">Canny Edge</label>
+            </div>
+            <!--<button type="submit" class="btn btn-primary" >Change</button>-->
+        </form>
+    </span>
+
+  
+</body>
+
+<script type="text/javascript">
+
+    var path_DataMap = "";
+    var path_folder = '';
+    var path_file = '';
+
+
+    function simple_event() {
+        const img = new Image();
+        alert('hello javascript')
+    }
+
+        
+    function submitResult() {
+
+        
+        let ajax = {}
+        ajax.type = 'post';
+        ajax.url = "/result_equalizeHist/";
+        ajax.data = JSON.stringify({'path':path_folder,'file':path_file,})
+        ajax.dataType = 'json';
+        ajax.csrf = '{{ csrf_token }}';
+        ajax.success = function(data) { ajaxSuccess(data); };
+        ajaxReady(ajax); 
+        return false;
+        
+    }
+
+    
+    function ajaxSuccess(data) {
+        path_img = data.path.substring(4,data.path.length);
+        path_plt_ori = data.plt_ori.substring(4,data.plt_ori.length);
+        path_plt_new = data.plt_new.substring(4,data.plt_new.length);
+        
+
+        $('#img_main'). attr('src',path_img+"?"+new Date().getTime());
+
+        
+        $('#img_plt_ori'). attr('src',path_plt_ori+"?"+new Date().getTime());
+        $('#img_plt_new'). attr('src',path_plt_new+"?"+new Date().getTime());
+
+
+        
+    }
+    
+    jQuery(document).ready(function($) {
+        // bind form using ajaxForm
+        $('#fileForm').ajaxForm({
+            dataType:  'json',
+            resetForm: true,    
+            success:   Success_getImage
+        });
+    });
+
+    function Success_getImage(data){
+        //alert(data.path.substring(4,data.path.length))
+        path = data.path +data.name
+        path = path.substring(4,path.length);
+        $('#img_main'). attr('src',path);
+        path_folder = data.path;
+        path_file = data.name;
+    }
+
+    function ImgUpload(){
+        $('#inputImage').click()
+    }
+</script>
+
+
+{% endblock %} 

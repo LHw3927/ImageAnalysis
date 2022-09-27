@@ -4,8 +4,14 @@
 
 <body>
     
-    <img id='img_main' style='width:1000' style='height:1000' src='/static/blog/image/QuteBird.jpg' onClick = 'getGrid()'/>
-    <div><button class='btn' style='background-color: #041E2D'><h6 style='color: #FFFFFF'>Upload</h6></button></div>
+    <img id='img_main' style='max-width:500px' style='max-height:500px' src="https://dummyimage.com/500x500/ffffff/000000.png&text=Image" onClick = 'getGrid()'/>
+
+    <form method="post" enctype="multipart/form-data" action="image_upload/" id="fileForm">
+        {% csrf_token %}
+        <label></label> <input type="file" name="file">
+        <button type="submit" class="btn btn-dark my-4" id="inputImage" style='display: none' >Upload</button>
+    </form>
+    <button class='btn' style='background-color: #041E2D'  onClick='ImgUpload()'><h6 style='color: #FFFFFF'>Upload</h6></button>
     <span>
         <form action="./result/" method="post" onsubmit="return submitResult();">
             <!-- {% csrf_token %} -->
@@ -28,12 +34,18 @@
 </body>
 
 <script type="text/javascript">
+
+
+    var path_folder = '';
+    var path_file = '';
+
+
     function submitResult() {
         
         let ajax = {}
         ajax.type = 'post';
         ajax.url = "/result_pMS/";
-        ajax.data = JSON.stringify({'path':'blog/static/blog/image/','file':'QuteBird.jpg',
+        ajax.data = JSON.stringify({'path':path_folder,'file':path_file,
         'sp':$('#form-input-sp').val(),'sr':$('#form-input-sr').val(), 'lv':$('#form-input-lv').val()})
         ajax.dataType = 'json';
         ajax.csrf = '{{ csrf_token }}';
@@ -51,25 +63,34 @@
 
 
   
-    var li_x = [];
-    var li_y = [];
+    
+    
+    jQuery(document).ready(function($) {
+        // bind form using ajaxForm
+        $('#fileForm').ajaxForm({
+            dataType:  'json',
+            resetForm: true,    
+            success:   Success_getImage
+        });
+    });
+
+    function Success_getImage(data){
+        //alert(data.path.substring(4,data.path.length))
+        img = $('#img_main')
+        path = data.path +data.name
+        path = path.substring(4,path.length);
+        img.attr('src',path);
+        path_folder = data.path;
+        path_file = data.name;
+
+       // var newImg = new Image(); 
+       // newImg.src = path
 
 
-    function getGrid(){
-        li_x.push(event.offsetX)
-        li_y.push(event.offsetY)
     }
 
-    function PrintGrid(){
-        var result = ""
-
-        result +=  li_x +'\n\n' + li_y
-
-        alert(result)
-
-        li_x = []
-        li_y = []
-        return false;
+    function ImgUpload(){
+        $('#inputImage').click()
     }
         
 </script>

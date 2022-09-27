@@ -13,7 +13,7 @@ import codecs, json
 
 
 def make(imgFolder_path,imgName):
-    origin_invisible = 0.5
+    origin_invisible = 0.25
 
     origin = np.array(Image.open(imgFolder_path + imgName))
     white = origin.copy()
@@ -29,10 +29,22 @@ def make(imgFolder_path,imgName):
 
     white[:,:,:] = 255
 
+    # 0,1 래밸 컨투어 가지고오기
     cont_level = __cont_hier(hier)
     cont_top = cont_level[0][0].copy()
     cont_top.extend(cont_level[0][1])
-    cont = [contours[i] for i in cont_top]
+
+
+
+    cont_big = __cont_SizeFilter(contours,85)
+    cont_final = __intersection(cont_top,cont_big)
+    # for i in cont_level:
+    #     cont_final.append([j for j in __intersection(i,cont_big)])
+
+
+
+
+    cont = [contours[i] for i in cont_final]
 
     cont_temp =  cv2.drawContours(white,cont,-1,[0,0,0])
     img_mean , map_data = __ContourColoring_mean(cont_temp,origin)
@@ -192,3 +204,22 @@ def __PyrMeanShiftFiltering(img,sp=9,sr=20,lv=2,permission=False):
         return cv2.pyrMeanShiftFiltering(img, sp, sr, None, lv)
     else:
         pass
+
+def __cont_SizeFilter(contours,standard):
+    li_cont_Size = np.array([cv2.contourArea(i) for i in contours])
+    li_cont_result = []
+    sta = np.percentile(li_cont_Size,standard)
+    
+    for i,v in enumerate(li_cont_Size):
+        if sta < v :
+            li_cont_result.append(i)
+        
+    return li_cont_result
+
+def __intersection(heir,size):
+    li_result = []
+    
+    for i in size:
+        if i in heir:
+            li_result.append(i)
+    return li_result 

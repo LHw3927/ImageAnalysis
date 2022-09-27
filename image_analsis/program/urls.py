@@ -7,5 +7,5 @@ urlpatterns = [
     path('naver/', views.naver, name='naver'),    
     path('naver_search/', views.naver_search, name='naver_search'),    
     path('scanimage/', views.scanimage, name='scanimage'),    
-    path('scanimage_upload/', views.scanimage_upload, name='scanimage_upload'),        
+    path('image_upload/', views.scanimage_upload, name='scanimage_upload'),        
 ]

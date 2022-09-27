@@ -1,0 +1,115 @@
+{% extends 'blog/base_full_width.html' %}
+
+{% block main_area %}
+
+<body>
+    
+    <img id='img_main' style='max-width:500px' style='max-height:500px' src="https://dummyimage.com/500x500/ffffff/000000.png&text=Image" onClick = 'getGrid()'/>
+    <form method="post" enctype="multipart/form-data" action="image_upload/" id="fileForm">
+        {% csrf_token %}
+        <label></label> <input type="file" name="file">
+        <button type="submit" class="btn btn-dark my-4" id="inputImage" style='display: none' >Upload</button>
+    </form>
+
+
+    <div>
+        <button class='btn' style='background-color: #041E2D'  onClick='ImgUpload()'><h6 style='color: #FFFFFF'>Upload</h6></button>
+    </div>
+    <div class="form-group">
+        <label for="form-input-ksize">ksize:</label><input type="range" name="ksize" class="form-control" id="form-input-ksize" ,min="0" max="50" value="0" step='2' required>
+        <label for="form-input-sigmaX">GaussianBlur_sigmaX:</label><input type="range" name="sigmaX" class="form-control" id="form-input-sigmaX" ,min="1" max="100" value="1" required>
+        <label for="form-input-sigma_color">Bilateral_sigma_color:</label><input type="range" name="sigma_color" class="form-control" id="form-input-sigma_color" ,min="1" max="100" value="1" required>
+        <label for="form-input-sigma_space">Bilateral_sigma_space:</label><input type="range" name="sigma_space" class="form-control" id="form-input-sigma_space" ,min="1" max="100" value="1" required>
+        <button type="submit" class="btn btn-primary"  onClick='submitResult_1()'>GaussianBlur</button>
+        <button type="submit" class="btn btn-primary"  onClick='submitResult_2()'>Bilateral</button>
+    </div>
+    
+    <div class="form-group">
+        <label for="form-input-mode">Gaussian, Bilateral</label>
+    </div>
+         
+       
+  
+
+  
+</body>
+
+<script type="text/javascript">
+
+
+    var path_folder = '';
+    var path_file = '';
+
+
+    function simple_event() {
+        const img = new Image();
+        alert('hello javascript')
+    }
+
+        
+    function submitResult_1() {
+
+        
+        let ajax = {}
+        ajax.type = 'post';
+        ajax.url = "/result_Gaussian_gau/";
+        ajax.data = JSON.stringify({'path':path_folder,'file':path_file,'ksize':$('#form-input-ksize').val(),'sigmaX':$('#form-input-sigmaX').val()})
+        ajax.dataType = 'json';
+        ajax.csrf = '{{ csrf_token }}';
+        ajax.success = function(data) { ajaxSuccess_1(data); };
+        ajaxReady(ajax); 
+        return false;
+        
+    }
+
+    
+    function ajaxSuccess_1(data) {
+        path = data.path.substring(4,data.path.length);
+        $('#img_main'). attr('src',path+"?"+new Date().getTime());
+    }
+
+    function submitResult_2() {
+
+        let ajax = {}
+        ajax.type = 'post';
+        ajax.url = "/result_Gaussian_bil/";
+        ajax.data = JSON.stringify({'path':path_folder,'file':path_file,'ksize':$('#form-input-ksize').val(),'sigma_color':$('#form-input-sigma_color').val(),'sigma_space':$('#form-input-sigma_space').val()})
+        ajax.dataType = 'json';
+        ajax.csrf = '{{ csrf_token }}';
+        ajax.success = function(data) { ajaxSuccess_1(data); };
+        ajaxReady(ajax); 
+        return false;
+      
+    }
+
+    
+    function ajaxSuccess_2(data) {
+        path = data.path.substring(4,data.path.length);
+        $('#img_main'). attr('src',path+"?"+new Date().getTime());
+    }
+    
+    jQuery(document).ready(function($) {
+        // bind form using ajaxForm
+        $('#fileForm').ajaxForm({
+            dataType:  'json',
+            resetForm: true,    
+            success:   Success_getImage
+        });
+    });
+
+    function Success_getImage(data){
+        //alert(data.path.substring(4,data.path.length))
+        path = data.path +data.name
+        path = path.substring(4,path.length);
+        $('#img_main'). attr('src',path);
+        path_folder = data.path;
+        path_file = data.name;
+    }
+
+    function ImgUpload(){
+        $('#inputImage').click()
+    }
+</script>
+
+
+{% endblock %} 
